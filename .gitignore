@@ -2,6 +2,8 @@
 out/
 
 .pi-subagents/*
+*#
+.#*
 
 # local-only binaries / tools
 lightpanda
