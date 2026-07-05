@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Publish out/*.md digests into site/data/digest.json as a single page.
+"""Publish out/*.md digests into docs/data/digest.json as a single page.
 
 Reads out/<src>_picks.md and out/<src>_rejects.md (produced by run.sh),
 strips the leading H1, and bundles them into one JSON file consumed by
-site/index.html — which renders all sections on one page with source
+docs/index.html — which renders all sections on one page with source
 color-coding and anchor nav.
 
 Sections are ordered: all picks (biorxiv, chemrxiv, rcsb) then all rejects,
@@ -19,7 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent
 OUT_DIR = ROOT / "out"
-SITE_DIR = ROOT / "site"
+SITE_DIR = ROOT / "docs"
 DATA_DIR = SITE_DIR / "data"
 DIGEST_FILE = DATA_DIR / "digest.json"
 

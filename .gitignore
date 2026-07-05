@@ -8,4 +8,4 @@ lightpanda
 *.pyc
 __pycache__/
 
-# site/data/digest.json IS committed (it's what GitHub Pages serves).
+# docs/data/digest.json IS committed (it's what GitHub Pages serves).

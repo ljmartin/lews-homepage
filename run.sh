@@ -59,11 +59,11 @@ echo
 echo "done. picks:"
 for src in "${SOURCES[@]}"; do echo "  out/${src}_picks.md"; done
 
-# --- publish to site/ (frontmattered markdown, rendered client-side) ---
+# --- publish to docs/ (frontmattered markdown, rendered client-side) ---
 if [[ -z "${NO_PUBLISH:-}" ]]; then
   echo
   echo "=========================================="
-  echo "  publishing to site/"
+  echo "  publishing to docs/"
   echo "=========================================="
   python3 publish.py
 fi

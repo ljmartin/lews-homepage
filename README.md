@@ -84,15 +84,15 @@ export CROSSREF_EMAIL=you@example.com   # optional but appreciated
 ## Weekly automation
 
 `run.sh` is what you'd schedule. It runs every source's scanner + LLM filter,
-then publishes the picks and rejects to `site/data/` as frontmattered markdown
-and rebuilds the site manifest. Example crontab entry (Mondays 08:00):
+then publishes the picks and rejects to `docs/data/digest.json`. Example
+crontab entry (Mondays 08:00):
 ```
 0 8 * * 1  /path/to/lews-homepage/run.sh >> /tmp/lews.log 2>&1
 ```
 
 ## Website (GitHub Pages)
 
-The `site/` directory is a static site rendered client-side with `marked.js`,
+The `docs/` directory is a static site rendered client-side with `marked.js`,
 split across two pages that share one `site.js`:
 
 - **`index.html`** (the homepage) — shows only the **picks** (one section per
@@ -115,16 +115,16 @@ where a result came from:
 
 `publish.py` is the bridge: it reads `out/<src>_picks.md` and
 `out/<src>_rejects.md`, strips their H1s, and bundles them into one
-`site/data/digest.json` (ordered: all picks, then all rejects). `run.sh`
+`docs/data/digest.json` (ordered: all picks, then all rejects). `run.sh`
 calls it automatically at the end; set `NO_PUBLISH=1` to skip.
 
 To preview locally:
 ```bash
-cd site && python3 -m http.server 8000
+cd docs && python3 -m http.server 8000
 ```
 
-For GitHub Pages, point the deploy source at the `site/` directory (Settings →
-Pages → Source: Deploy from a branch → `/site`). `site/data/digest.json` is
+For GitHub Pages, point the deploy source at the `docs/` directory (Settings →
+Pages → Source: Deploy from a branch → `/docs`). `docs/data/digest.json` is
 committed so the site has content to serve.
 
 ## Layout
@@ -137,8 +137,8 @@ chemrxiv_scan.py    ← chemRxiv scanner (Stage 1, via Crossref)
 rcsb_scan.py        ← RCSB PDB scanner (Stage 1, via search + data REST APIs)
 llm_filter.py       ← LLM judge (Stage 2, source-agnostic) → picks + rejects
 run.sh              ← run the whole pipeline (all sources, scan + filter + publish)
-publish.py          ← bridge out/*.md → site/data/digest.json (single page)
-site/               ← static GitHub-Pages site (two pages sharing site.js)
+publish.py          ← bridge out/*.md → docs/data/digest.json (single page)
+docs/               ← static GitHub-Pages site (two pages sharing site.js)
 ├── index.html      ← homepage: fetches digest.json, shows picks only
 ├── rejects.html    ← debug page: shows rejects only
 ├── site.js         ← shared render logic (filters digest.json by kind)
