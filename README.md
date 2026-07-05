@@ -166,3 +166,4 @@ out/                ← pipeline output (candidates + picks + rejects, gitignore
   their own group.
 - **JMC** — TODO.
 
+
