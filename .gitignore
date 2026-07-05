@@ -1,6 +1,8 @@
 # pipeline output (regenerated each run)
 out/
 
+.pi-subagents/*
+
 # local-only binaries / tools
 lightpanda
 

@@ -165,3 +165,4 @@ out/                ← pipeline output (candidates + picks + rejects, gitignore
   codes is judged once, not five times. Entries with no publication are each
   their own group.
 - **JMC** — TODO.
+
