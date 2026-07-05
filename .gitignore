@@ -1,0 +1,11 @@
+# pipeline output (regenerated each run)
+out/
+
+# local-only binaries / tools
+lightpanda
+
+# python
+*.pyc
+__pycache__/
+
+# site/data/digest.json IS committed (it's what GitHub Pages serves).
