@@ -17,7 +17,7 @@
   </div>
 </nav>
 <main>
-  What is this? It is a personalised homepage for me, lewis. Biorxiv, Chemrxiv, and RCSB Entries from the last seven days have been downloaded, then filtered by a cheap model with a prompt intended to catch articles interesting to me. Articles can be ticked if they've been seen, to avoid re-reading them, which is stored per-browser using localStorage. Articles are updated weekly on LJM's computer with a cronjob and pushed back to github.
+  What is this? It is a personalised homepage for me, lewis. Biorxiv, Chemrxiv, and RCSB Entries from the last seven days get downloaded once a week, then filtered by a cheap model (DeepSeek V4 Flash) with a prompt intended to catch articles interesting to me. These are saved to markdown, and then converted to html by marked.js. This is pushed to github pages. Articles can be ticked if they've been seen to avoid re-reading old stuff, and ticks are stored locally using localStorage. Articles are updated weekly on LJM's computer with a cron job and pushed back to github, which rebuilds pages. 
 The repo is at https://github.com/ljmartin/lews-homepage  <div id="rendered"></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
