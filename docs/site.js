@@ -53,6 +53,7 @@ function renderDigest(kind) {
           h.style.paddingLeft = '0.5rem';
         });
         makeAbstractsCollapsible(body);
+        addSeenCheckboxes(body);
         section.appendChild(body);
         root.appendChild(section);
       });
@@ -68,6 +69,63 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNav(kind);
   renderDigest(kind);
 });
+
+// ---- "seen" checkboxes (localStorage) ----
+// Injects a checkbox into each entry's <h2>, using the DOI (or bioRxiv
+// content URL) as a stable key.  Dims the entire entry (heading + body)
+// when checked.
+function addSeenCheckboxes(root) {
+  root.querySelectorAll('h2').forEach(h2 => {
+    const ul = h2.nextElementSibling;
+    if (!ul || ul.tagName !== 'UL') return;
+
+    // Locate the identifier link inside the list that follows this heading.
+    // Prefer doi.org; fall back to biorxiv.org/content/...
+    let id = null;
+    ul.querySelectorAll('li a').forEach(a => {
+      const href = a.getAttribute('href');
+      if (!href) return;
+      if (href.startsWith('https://doi.org/')) {
+        id = 'doi:' + href.replace('https://doi.org/', '');
+      } else if (!id && href.startsWith('https://www.biorxiv.org/content/')) {
+        id = 'biorxiv:' + href.replace('https://www.biorxiv.org/content/', '');
+      }
+    });
+    if (!id) return;
+
+    const storageKey = 'seen_' + id;
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'post-checkbox';
+    cb.title = 'Mark as read / seen';
+
+    // Collect all elements that make up this entry (the <h2> and the
+    // <ul> body after it, plus any <p> or stray text nodes that belong).
+    const entryParts = [h2];
+    let el = h2.nextElementSibling;
+    while (el && el.tagName === 'UL') {
+      entryParts.push(el);
+      el = el.nextElementSibling;
+    }
+
+    // Restore saved state.
+    cb.checked = localStorage.getItem(storageKey) === 'true';
+
+    const updateStyle = () => {
+      const dimmed = cb.checked ? '0.4' : '1';
+      entryParts.forEach(e => { e.style.opacity = dimmed; });
+    };
+    updateStyle();
+
+    cb.addEventListener('change', function () {
+      localStorage.setItem(storageKey, this.checked ? 'true' : 'false');
+      updateStyle();
+    });
+
+    h2.insertBefore(cb, h2.firstChild);
+  });
+}
 
 // ---- expandable abstracts ----
 const ABSTRACT_PREVIEW = 180; // chars shown before the "more" button

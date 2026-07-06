@@ -62,6 +62,19 @@ section { margin-top: 2rem; }
 a { color: #1a5fb4; }
 code { background: #f4f4f4; padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
 
+/* ---- seen-checkbox ---- */
+.post-checkbox {
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.section-body h2 {
+  display: flex;
+  align-items: baseline;
+}
+
 /* ---- expandable abstracts ----
    display toggling handled entirely in JS via inline styles, so no CSS
    display rule here (it would shadow the inline toggle). */
