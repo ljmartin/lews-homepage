@@ -275,11 +275,13 @@ def fmt_md(paper: dict, rank: int) -> str:
     cat = paper.get("category", "")
     pdb_ids = paper.get("pdb_ids", [])
     topics = paper["_topics"]
+    pdb_links = ', '.join(
+        f'[{pid}](https://www.rcsb.org/structure/{pid})' for pid in pdb_ids)
     lines = [
         f"## {rank}. {title}",
         f"- **{d}** · {cat}"
         + (f" · {paper['n_pdb']} PDB entries" if len(pdb_ids) > 1 else ""),
-        f"- PDB: {', '.join(pdb_ids)}",
+        f"- PDB: {pdb_links}",
         f"- {url}",
         f"- topics: {', '.join(topics)}",
     ]

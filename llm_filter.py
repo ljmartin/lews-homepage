@@ -238,7 +238,8 @@ def fmt_paper_md(p: dict, rank: int, source: str, rejected: bool = False) -> str
         f"- **{p.get('date','')}** · {p.get('category','') or source}",
     ]
     if p.get("pdb_ids"):
-        lines.append(f"- PDB: {', '.join(p['pdb_ids'])}")
+        pdb_links = ', '.join(f'[{pid}](https://www.rcsb.org/structure/{pid})' for pid in p['pdb_ids'])
+        lines.append(f"- PDB: {pdb_links}")
     lines += [
         f"- {reason_label}: {p['_llm_reason']}",
         f"- topics: {topics}",
