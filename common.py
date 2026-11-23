@@ -10,7 +10,27 @@ from __future__ import annotations
 
 import json
 import re
+import ssl
+import urllib.request
 from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# SSL context – prefer certifi's up-to-date CA bundle over the system store,
+# which on macOS is often missing newer root CAs (e.g. SSL.com TLS RSA Root
+# CA 2022 used by RCSB PDB servers).
+# ---------------------------------------------------------------------------
+try:
+    import certifi
+    _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+    _handler = urllib.request.HTTPSHandler(context=_SSL_CTX)
+    urllib.request.install_opener(urllib.request.build_opener(_handler))
+except ImportError:
+    _SSL_CTX = ssl.create_default_context()
+
+
+def get_ssl_context() -> ssl.SSLContext:
+    """Return a shareable SSLContext (certifi-backed when available)."""
+    return _SSL_CTX
 
 DEFAULT_SETTINGS = Path(__file__).parent / "settings.json"
 

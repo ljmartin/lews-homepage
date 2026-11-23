@@ -54,8 +54,15 @@ def _post_json(url: str, payload: dict, timeout: int = 60) -> dict:
     for attempt in range(3):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
-                return json.loads(resp.read().decode())
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+                raw = resp.read()
+                if not raw:
+                    return {}  # HTTP 204 / empty body (e.g. no search results)
+                return json.loads(raw.decode())
+        except urllib.error.HTTPError as e:
+            # Don't retry client errors (4xx) — they won't fix themselves.
+            body = e.read().decode(errors="replace")
+            raise RuntimeError(f"{url} returned {e.code}: {body[:500]}") from e
+        except (urllib.error.URLError, TimeoutError) as e:
             last = e
             time.sleep(2 ** attempt)
     raise RuntimeError(f"{url} failed after retries: {last}")
