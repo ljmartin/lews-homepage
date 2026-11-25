@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#112433">
+  <meta name="description" content="A serendipitous feed of ligand-bound structures from the Protein Data Bank.">
+  <title>PDB Explorer — Lew's fieldnotes</title>
+  <style>
+    :root { --ink:#152936; --muted:#5d7080; --subtle:#8093a0; --bg:#f4f7f7; --card:#fff; --line:#dce5e7; --accent:#087d84; --accentdark:#08636a; --tealbg:#e9f8f6; --gold:#b37e34; --radius:18px; }
+    * {box-sizing:border-box} html {scroll-behavior:smooth} body {margin:0; font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased}
+    button,input,select {font:inherit} button {cursor:pointer} a {color:inherit} a:hover{color:var(--accent)}
+    .topbar {background:#102531;color:#f1f8f8; border-bottom:1px solid #2b4954}
+    .top-inner {max-width:1150px;margin:auto;padding:15px 28px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+    .brand {display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;font-weight:800;letter-spacing:-.04em;font-size:20px}
+    .brand-mark{width:38px;height:38px;border:1px solid #56969a;border-radius:12px;display:grid;place-items:center;background:#183b45;overflow:hidden}
+    .brand-mark svg{width:29px;height:29px}
+    .navlinks{display:flex;gap:22px;font-size:13px;font-weight:650}.navlinks a{text-decoration:none;color:#afc4cb}.navlinks a.active{color:#fff}.navlinks a.active:after{content:"";display:block;height:2px;background:#6bcfc7;margin-top:6px}
+    .hero {background:#102531;color:#fff;position:relative;overflow:hidden}
+    .hero:before {content:"";position:absolute;inset:-50% -30% auto auto;width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,#16616a66 0%,transparent 68%);pointer-events:none}
+    .hero-inner {max-width:1150px;margin:auto;padding:50px 28px 49px;position:relative;display:flex;justify-content:space-between;align-items:center;gap:40px}
+    .eyebrow {display:flex;align-items:center;gap:9px;color:#8ce2d7;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:.17em}
+    .dot{width:8px;height:8px;border-radius:50%;background:#7de0d2;box-shadow:0 0 0 5px #7de0d21c}
+    h1 {font-size:clamp(34px,4vw,52px);line-height:1.06;margin:16px 0 15px;letter-spacing:-.055em;max-width:540px}
+    .hero p{margin:0;color:#b7cbd0;font-size:15px;line-height:1.75;max-width:550px}
+    .hero-visual{width:275px;height:158px;flex-shrink:0;opacity:.88}
+    .layout{max-width:1150px;margin:auto;padding:28px;display:grid;grid-template-columns:minmax(0,730px) 286px;gap:26px;align-items:start}
+    .feed-top{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:15px}
+    .section-tag {font-size:11px;font-weight:850;color:var(--accentdark);letter-spacing:.13em;text-transform:uppercase}
+    h2{margin:4px 0;font-size:25px;letter-spacing:-.04em;line-height:1.2}
+    .hint{font-size:12px;color:var(--muted);line-height:1.5}
+    .tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:15px}
+    .tab{padding:10px 15px;border-radius:10px;color:#5c6f7b;background:#e8eeef;border:1px solid transparent;font-size:12px;font-weight:750;white-space:nowrap;transition:.16s}
+    .tab:hover{background:#dbe8e8}.tab[aria-pressed="true"]{background:#123d45;border-color:#123d45;color:#fff}
+    .tab .tab-icon{margin-right:5px;opacity:.8}
+    .filter-toggle{display:none;border:1px solid #bdd8d8;background:#fff;border-radius:8px;padding:8px 10px;color:#285a60;font-size:12px;font-weight:700}
+    .status-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:13px 0 17px;min-height:17px;font-size:12px;color:var(--muted)}
+    .status-bar .live{display:inline-flex;gap:6px;align-items:center}.status-bar .live:before{content:"";width:6px;height:6px;border-radius:50%;background:#4aaea1}
+    .feed{display:flex;flex-direction:column;gap:16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 3px 20px #17313b09;overflow:hidden}
+    .card-head{padding:22px 23px 18px}.card-topline{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+    .pdbid{display:inline-flex;gap:6px;align-items:center;background:var(--tealbg);color:#006d70;padding:6px 9px;border-radius:6px;font-size:11px;letter-spacing:.075em;font-weight:900;text-decoration:none}
+    .release,.meta-item{font-size:12px;color:var(--muted)}.card-title{font-size:21px;line-height:1.38;letter-spacing:-.032em;font-weight:750;margin:0 0 12px}
+    .card-subhead{font-size:12px;color:#577080;display:flex;gap:13px;flex-wrap:wrap;align-items:center}
+    .card-subhead span{display:inline-flex;gap:5px;align-items:center}
+    .ligand-panel{margin:0 22px 19px;border:1px solid #dfe9e9;background:#fafdfc;border-radius:13px;display:flex;min-height:185px;overflow:hidden}
+    .depiction{width:45%;min-width:190px;display:flex;align-items:center;justify-content:center;padding:13px;background:#fff;border-right:1px solid #e7eeee;position:relative}
+    .depiction svg{display:block;width:100%;height:156px;max-height:156px}.depiction .depict-placeholder{font-size:12px;text-align:center;color:#91a4a8;max-width:160px}
+    .ligand-details{flex:1;padding:21px 22px;min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+    .micro-label{text-transform:uppercase;letter-spacing:.115em;font-size:10px;font-weight:850;color:var(--subtle);margin-bottom:7px}
+    .ligand-name{font-weight:750;line-height:1.4;font-size:16px;word-break:break-word;overflow-wrap:anywhere;max-height:90px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+    .ligand-meta{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.65}
+    .tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.tag{font-size:10px;font-weight:760;background:#e9efee;color:#48606a;padding:5px 8px;border-radius:6px}
+    .abstract-area{border-top:1px solid #edf1f2;padding:15px 23px 16px}.paper-label{font-size:10px;text-transform:uppercase;color:var(--subtle);font-weight:850;letter-spacing:.1em;margin-bottom:6px}
+    .paper-title{font-size:13px;font-weight:650;line-height:1.5;color:#344c58}.abstract-toggle{border:0;background:transparent;padding:8px 0 0;color:var(--accentdark);font-weight:750;font-size:12px}
+    .abstract-content{font-size:13px;line-height:1.72;color:#435b68;margin:12px 0 1px;white-space:pre-wrap}
+    .card-footer{border-top:1px solid var(--line);display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 22px;background:#fafcfc}
+    .action{font-size:12px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 12px;border-radius:8px;font-weight:750;border:1px solid #d9e6e6;background:#fff;color:#32515c}
+    .action:hover{color:#066e76;border-color:#9ccccc}.action.primary{color:#fff;background:#0a6970;border-color:#0a6970}.action.primary:hover{background:#07545b;color:#fff}
+    .bookmark{margin-left:auto;background:transparent;border:1px solid transparent;color:#697e89}.bookmark[aria-pressed="true"]{background:#fff5df;border-color:#edd39b;color:#945e11}
+    .bookmark svg,.action svg{width:14px;height:14px;flex:none}
+    .rail{position:sticky;top:22px;display:flex;flex-direction:column;gap:16px}
+    .rail-box{background:#fff;border:1px solid var(--line);border-radius:15px;padding:21px 19px;box-shadow:0 3px 18px #17313b08}
+    .rail-title{font-size:13px;font-weight:850;margin:0 0 14px;display:flex;gap:7px;align-items:center}
+    .field-label{display:block;font-size:11px;color:#627b85;font-weight:750;margin:13px 0 7px}
+    .field{width:100%;border:1px solid #d7e3e5;background:#f9fbfb;color:var(--ink);padding:11px 12px;border-radius:9px;outline:none;font-size:13px}
+    .field:focus{border-color:#2eabb0;box-shadow:0 0 0 3px #2eabb01c}
+    .rail-note{margin:10px 0 0;font-size:11px;color:var(--muted);line-height:1.6}
+    .rail-separator{height:1px;background:var(--line);margin:17px 0}
+    .mini-stat{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);padding:6px 0}.mini-stat strong{color:var(--ink);font-variant-numeric:tabular-nums}
+    .sample-button{border:1px solid #c5e6e3;color:#006e71;background:#edf9f7;padding:10px;width:100%;border-radius:9px;font-size:12px;font-weight:750;margin-top:14px;text-align:left}
+    .loading{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;gap:14px;align-items:center;font-size:13px;color:var(--muted)}
+    .spinner{width:18px;height:18px;border:2px solid #d7eded;border-top-color:#168188;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}@keyframes spin{to{transform:rotate(360deg)}}
+    .empty{border:1px dashed #b9cbcd;border-radius:16px;text-align:center;padding:46px 30px;color:var(--muted);background:#ffffffa8}.empty strong{display:block;color:var(--ink);margin-bottom:9px;font-size:17px}
+    .error{border:1px solid #ebcdbe;background:#fff9f5;border-radius:13px;padding:20px;color:#865234;font-size:13px;line-height:1.7}.error button{background:#fff;border:1px solid #d3a88f;padding:8px 12px;border-radius:7px;color:#865234;font-weight:750;margin-top:12px}
+    .load-wrap{text-align:center;padding:22px 0 42px}.load-button{background:#fff;color:#24545b;border:1px solid #bcd6d7;border-radius:11px;padding:12px 26px;font-size:13px;font-weight:800}.load-button:hover{background:#e8f7f5}.load-button:disabled{opacity:.6;cursor:default}
+    footer{padding:30px 28px 50px;text-align:center;font-size:11px;color:#748a93} footer a{color:#367780}
+    .hidden{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:930px){.layout{grid-template-columns:minmax(0,1fr) 235px;gap:17px}.hero-visual{width:190px}.depiction{min-width:145px}.ligand-panel{flex-wrap:wrap}.depiction{min-height:158px}.ligand-details{padding:16px}}
+    @media(max-width:710px){.layout{display:flex;flex-direction:column;padding:18px 14px}.main{width:100%}.rail{order:-1;width:100%;position:static}.rail:not(.open){display:none}.rail .rail-box:nth-child(2){display:none}.filter-toggle{display:inline-flex;align-items:center;gap:5px}.hero-inner{padding:32px 18px}.hero-visual{display:none}.top-inner{padding:12px 18px}.brand{font-size:17px}.navlinks{gap:12px;font-size:12px}.tabs{gap:5px}.tab{padding:10px 11px;font-size:11px}.card-head{padding:18px 17px 15px}.card-title{font-size:18px}.ligand-panel{margin:0 14px 14px}.depiction{width:44%;min-width:140px;padding:7px}.ligand-details{min-width:160px;padding:12px 13px}.ligand-name{font-size:13px}.card-footer{padding:11px 14px;gap:7px}.action{font-size:11px;padding:9px}.abstract-area{padding:15px 17px}.bookmark{margin-left:0}.rail-box{padding:14px 17px}}
+    @media(max-width:390px){.depiction{width:100%;border-right:0;border-bottom:1px solid #e7eeee}.ligand-details{min-height:115px}.navlinks a:first-child{display:none}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-inner">
+      <a class="brand" href="index.html" aria-label="Lew's fieldnotes home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="#a5ebe1" stroke-width="1.7"><path d="M10 11l8-5 9 5v10l-9 5-8-5zM10 11l8 7 9-7M18 18v8"/><circle cx="10" cy="11" r="2.8" fill="#a5ebe1"/><circle cx="27" cy="21" r="2.8" fill="#a5ebe1"/><circle cx="18" cy="6" r="2.8" fill="#a5ebe1"/></svg></span>
+        LEW'S <span style="font-weight:400;color:#a6cad0">FIELDNOTES</span>
+      </a>
+      <nav class="navlinks" aria-label="Main navigation"><a href="index.html">Weekly digest</a><a class="active" aria-current="page" href="pdb-explorer.html">PDB Explorer</a></nav>
+    </div>
+  </header>
+  <section class="hero">
+    <div class="hero-inner">
+      <div><div class="eyebrow"><span class="dot"></span> Structural biology, on shuffle</div><h1>The PDB, one ligand<br>at a time.</h1><p>A scrolling notebook of bound molecules, protein structures and the stories behind them. From this week's releases to forgotten gems.</p></div>
+      <svg class="hero-visual" viewBox="0 0 275 158" fill="none" aria-hidden="true"><g stroke="#429b9c" stroke-width="1.6" opacity=".65"><path d="M22 77l29-18 30 17 30-17 29 18 30-18 30 18 30-18 27 18"/><path d="M51 59v-33l27-15 31 16v32M79 76v31l31 17 30-17V77M170 59v-32l30-16 31 16v32M200 77v32l30 17 27-18V77"/><path d="M110 59l14-29 28-4 18 33M140 107l28 17 31-15"/></g><g fill="#8ddcd7"><circle cx="22" cy="77" r="5"/><circle cx="80" cy="76" r="5"/><circle cx="140" cy="77" r="6"/><circle cx="201" cy="77" r="7"/><circle cx="257" cy="77" r="5"/><circle cx="110" cy="59" r="4"/><circle cx="170" cy="59" r="5"/></g><g fill="#d6ac72"><circle cx="51" cy="59" r="4"/><circle cx="110" cy="124" r="4"/><circle cx="230" cy="126" r="5"/><circle cx="200" cy="11" r="4"/></g><circle cx="140" cy="77" r="28" stroke="#94e2da" stroke-dasharray="3 7" opacity=".5"/></svg>
+    </div>
+  </section>
+  <div class="layout">
+    <main class="main" id="content">
+      <div class="feed-top"><div><div class="section-tag">The structure feed</div><h2 id="feed-heading">Fresh from the archive</h2></div><div style="display:flex;align-items:center;gap:9px"><span class="hint" id="counter" aria-live="polite">&nbsp;</span><button class="filter-toggle" type="button" id="filter-toggle" aria-controls="controls" aria-expanded="false">☷ Filters</button></div></div>
+      <div class="tabs" role="group" aria-label="Feed mode">
+        <button class="tab" data-mode="latest" aria-pressed="true"><span class="tab-icon">◷</span>Latest</button>
+        <button class="tab" data-mode="old" aria-pressed="false"><span class="tab-icon">◈</span>Deep cuts</button>
+        <button class="tab" data-mode="random" aria-pressed="false"><span class="tab-icon">✳</span>Surprise me</button>
+        <button class="tab" data-mode="saved" aria-pressed="false"><span class="tab-icon">♡</span>Saved <span id="saved-count"></span></button>
+      </div>
+      <div class="status-bar"><span class="live" id="feed-description">Live from the RCSB PDB</span><span id="filter-hint">Ligands of interest · ≥150 Da</span></div>
+      <div class="feed" id="feed" aria-live="polite"></div>
+      <div class="load-wrap"><button class="load-button" id="load-more" type="button">Load more structures</button></div>
+    </main>
+    <aside class="rail" id="controls" aria-label="Explore controls">
+      <section class="rail-box"><div class="rail-title">⌕ &nbsp;Tune your feed</div>
+        <label class="field-label" for="text-filter">Find in loaded structures</label><input class="field" id="text-filter" type="search" placeholder="Kinase, GPCR, KRAS…" autocomplete="off">
+        <label class="field-label" for="method-filter">Experimental method</label><select class="field" id="method-filter"><option value="all">Any method</option><option value="xray">X-ray</option><option value="em">Cryo-EM</option><option value="other">Other</option></select>
+        <p class="rail-note">These filters act on cards already fetched. The feed itself searches RCSB for ligands annotated as subjects of investigation.</p>
+        <div class="rail-separator"></div><div class="mini-stat"><span>Cards loaded</span><strong id="stat-loaded">0</strong></div><div class="mini-stat"><span>Saved to this browser</span><strong id="stat-saved">0</strong></div>
+        <button class="sample-button" type="button" id="example">Try the classic: 1IEP (imatinib) ↗</button>
+      </section>
+      <section class="rail-box"><div class="rail-title">✦ &nbsp;How this works</div>
+        <p class="rail-note">Search and structure metadata come straight from <a href="https://www.rcsb.org/" target="_blank" rel="noopener">RCSB PDB</a>. Chemical drawings are generated locally in your browser using RDKit.js. Abstracts are requested from Europe PMC only when opened.</p>
+        <p class="rail-note">Every <strong>Explore 3D</strong> link opens RCSB's ligand-interaction preset focused on that molecule's <code>label_asym_id</code>.</p>
+      </section>
+    </aside>
+  </div>
+  <footer>A personal discovery interface built on open structural data. <a href="https://www.rcsb.org/" target="_blank" rel="noopener">RCSB PDB</a> · <a href="https://europepmc.org/" target="_blank" rel="noopener">Europe PMC</a> · <a href="https://www.rdkit.org/" target="_blank" rel="noopener">RDKit</a></footer>
+  <script>
+  (() => {
+    'use strict';
+    const SEARCH_API = 'https://search.rcsb.org/rcsbsearch/v2/query';
+    const DATA_API = 'https://data.rcsb.org/graphql';
+    const EUROPE_PMC = 'https://www.ebi.ac.uk/europepmc/webservices/rest/search';
+    const RDKIT_JS = 'https://unpkg.com/@rdkit/rdkit@2025.3.3-1.0.0/dist/RDKit_minimal.js';
+    const STORE_KEY = 'lews-pdb-explorer-saved-v1';
+    const PAGE_SIZE = 12;
+    const EXCLUDE = new Set('HOH DOD SO4 PO4 GOL EDO PEG PG4 PGE ACT ACE ACY CL NA K CA MG ZN MN FE CU NI CO CD I BR F TRS MES HEP CIT DMS DTT BME MPD IPA EPE IMD NH4 NAG MAN BGC BMA FUC BNG BDP SIA'.split(' '));
+    const $ = id => document.getElementById(id);
+    const text = (value, fallback = '') => value == null || value === '' ? fallback : String(value);
+    const escapeHTML = s => text(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const keyFor = c => `${c.pdb}:${c.comp}:${c.asym}`;
+    const state = {mode:'latest',generation:0,offset:0,total:0,loading:false,ended:false,cards:[],seen:new Set(),saved:readSaved(),drawQueue:[],randomPages:new Set(),rdkitPromise:null};
+    function readSaved(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')||{}}catch(_){return {}}}
+    function persistSaved(){try{localStorage.setItem(STORE_KEY,JSON.stringify(state.saved))}catch(_){showToast('Storage is unavailable in this browser.')}}
+    function updateStats(){const n=Object.keys(state.saved).length;$('saved-count').textContent=n?`(${n})`:'';$('stat-saved').textContent=n;$('stat-loaded').textContent=state.cards.length;$('counter').textContent=state.mode==='saved'?`${n} saved`:state.cards.length?`${state.cards.length} complexes`:'';}
+    function showToast(message){$('feed-description').textContent=message}
+    const leaf = (attribute,operator,value) => ({type:'terminal',service:'text',parameters:{attribute,operator,...(value!==undefined?{value}:{})}});
+    function buildSearch(offset,rows){
+      // The nested group is important: the LOI comp_id and annotation type must belong to the same item.
+      const loi={type:'group',logical_operator:'and',label:'nested-attribute',nodes:[
+        leaf('rcsb_nonpolymer_entity_annotation.comp_id','exists'),
+        leaf('rcsb_nonpolymer_entity_annotation.type','exact_match','SUBJECT_OF_INVESTIGATION')
+      ]};
+      const nodes=[loi];
+      if(state.mode==='old')nodes.push(leaf('rcsb_accession_info.initial_release_date','less','2015-01-01'));
+      const direction=state.mode==='old'?'asc':'desc';
+      return {query:{type:'group',logical_operator:'and',nodes},return_type:'entry',request_options:{paginate:{start:offset,rows},sort:[{sort_by:'rcsb_accession_info.initial_release_date',direction}]}};
+    }
+    const GRAPHQL=`query ExplorePDB($ids:[String!]!){
+      entries(entry_ids:$ids){
+        rcsb_id struct{title}
+        rcsb_entry_info{experimental_method resolution_combined}
+        rcsb_accession_info{initial_release_date}
+        rcsb_primary_citation{title pdbx_database_id_PubMed pdbx_database_id_DOI year}
+        polymer_entities{rcsb_polymer_entity{pdbx_description} rcsb_polymer_entity_container_identifiers{uniprot_ids}}
+        nonpolymer_entities{
+          rcsb_nonpolymer_entity_container_identifiers{nonpolymer_comp_id asym_ids}
+          rcsb_nonpolymer_entity_annotation{type}
+          nonpolymer_comp{chem_comp{id name formula_weight} rcsb_chem_comp_descriptor{SMILES}}
+          nonpolymer_entity_instances{rcsb_nonpolymer_entity_instance_container_identifiers{asym_id}}
+        }
+      }
+    }`;
+    async function fetchJSON(url, options={}){
+      const response=await fetch(url,{...options,headers:{Accept:'application/json',...(options.headers||{})}});
+      if(!response.ok)throw new Error(`${new URL(url).host} returned HTTP ${response.status}`);
+      return response.json();
+    }
+    async function search(offset,rows){
+      const body=buildSearch(offset,rows);
+      // POST keeps large search expressions out of the URL; RCSB supports browser CORS.
+      return fetchJSON(SEARCH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }
+    async function describe(ids){
+      const result=await fetchJSON(DATA_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:GRAPHQL,variables:{ids}})});
+      if(result.errors?.length)throw new Error(`RCSB GraphQL: ${result.errors[0].message}`);
+      return result.data?.entries||[];
+    }
+    function acceptableEntity(entity){
+      const chem=entity.nonpolymer_comp?.chem_comp||{};
+      const id=text(chem.id||entity.rcsb_nonpolymer_entity_container_identifiers?.nonpolymer_comp_id).toUpperCase();
+      const mass=Number(chem.formula_weight)||0;
+      return id && mass>=150 && !EXCLUDE.has(id);
+    }
+    function fromEntry(entry){
+      const pdb=text(entry.rcsb_id).toUpperCase();if(!pdb)return [];
+      const protein=(entry.polymer_entities||[]).map(x=>x.rcsb_polymer_entity?.pdbx_description).filter(Boolean);
+      const uniqueProteins=[...new Set(protein)];
+      const items=(entry.nonpolymer_entities||[]).filter(acceptableEntity);
+      const marked=items.filter(e=>(e.rcsb_nonpolymer_entity_annotation||[]).some(x=>x.type==='SUBJECT_OF_INVESTIGATION'));
+      const selected=(marked.length?marked:items).slice(0,2);
+      return selected.map(entity=>{
+        const chem=entity.nonpolymer_comp?.chem_comp||{};
+        const ident=entity.rcsb_nonpolymer_entity_container_identifiers||{};
+        const instance=(entity.nonpolymer_entity_instances||[]).map(x=>x.rcsb_nonpolymer_entity_instance_container_identifiers?.asym_id).find(Boolean);
+        const asym=text(instance||(ident.asym_ids||[])[0]);
+        if(!asym)return null; // Never guess an RCSB label_asym_id.
+        return {pdb,comp:text(chem.id||ident.nonpolymer_comp_id).toUpperCase(),asym,
+          ligand:text(chem.name,'Unnamed ligand'),smiles:text(entity.nonpolymer_comp?.rcsb_chem_comp_descriptor?.SMILES),mw:Number(chem.formula_weight)||0,
+          title:text(entry.struct?.title,pdb),protein:uniqueProteins.slice(0,3),
+          method:text(entry.rcsb_entry_info?.experimental_method),resolution:entry.rcsb_entry_info?.resolution_combined?.[0]??null,
+          released:text(entry.rcsb_accession_info?.initial_release_date),
+          paper:text(entry.rcsb_primary_citation?.title),doi:text(entry.rcsb_primary_citation?.pdbx_database_id_DOI),
+          pmid:text(entry.rcsb_primary_citation?.pdbx_database_id_PubMed),year:entry.rcsb_primary_citation?.year??null};
+      }).filter(Boolean);
+    }
+    function rcsb3D(c){const u=new URL(`https://www.rcsb.org/3d-view/${encodeURIComponent(c.pdb)}`);u.searchParams.set('preset','ligandInteraction');u.searchParams.set('label_asym_id',c.asym);return u.href}
+    function formatDate(s){if(!s)return 'Date unknown';const d=new Date(s);return Number.isNaN(d.getTime())?s:d.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}
+    function formatMethod(m){return m.includes('X-RAY')?'X-ray diffraction':m.includes('ELECTRON')?'Cryo-EM / EM':m.includes('NMR')?'NMR':m?m:'Method unknown'}
+    function family(c){const t=[c.title,...c.protein].join(' ').toLowerCase();for(const [pattern,label] of [[/kinase|phosphorylation/,'Kinase'],[/g.protein.coupled|gpcr|adrenergic|opioid receptor/,'GPCR'],[/protease|proteinase|peptidase/,'Protease'],[/polymerase/,'Polymerase'],[/reductase|oxidase|dehydrogenase/,'Oxidoreductase'],[/transporter|channel|pump/,'Transporter'],[/ribosom/,'Ribosome']])if(pattern.test(t))return label;return 'Protein–ligand'}
+    function icon(name){if(name==='arrow')return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>';if(name==='bookmark')return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4.5h12v16l-6-4-6 4z"/></svg>';return ''}
+    function cardHTML(c){
+      const id=keyFor(c),saved=!!state.saved[id];const resolution=c.resolution?`${Number(c.resolution).toFixed(2)} Å`:'';
+      const abstractAvailable=!!(c.pmid||c.doi);
+      return `<article class="card" data-key="${escapeHTML(id)}">
+        <div class="card-head"><div class="card-topline"><a class="pdbid" href="https://www.rcsb.org/structure/${encodeURIComponent(c.pdb)}" target="_blank" rel="noopener">◈ ${escapeHTML(c.pdb)}</a><span class="release">Released ${escapeHTML(formatDate(c.released))}</span></div>
+        <h3 class="card-title">${escapeHTML(c.title)}</h3><div class="card-subhead"><span>⌬ ${escapeHTML(formatMethod(c.method))}</span>${resolution?`<span>◇ ${escapeHTML(resolution)}</span>`:''}${c.protein.length?`<span>◌ ${escapeHTML(c.protein[0].slice(0,85))}</span>`:''}</div></div>
+        <div class="ligand-panel"><div class="depiction" data-smiles="${escapeHTML(c.smiles)}" data-comp="${escapeHTML(c.comp)}"><div class="depict-placeholder">Preparing 2D structure…</div></div>
+          <div class="ligand-details"><div class="micro-label">Bound ligand · ${escapeHTML(c.comp)}</div><div class="ligand-name" title="${escapeHTML(c.ligand)}">${escapeHTML(c.ligand)}</div><div class="ligand-meta">${Math.round(c.mw)} Da · ligand chain ${escapeHTML(c.asym)}</div><div class="tag-row"><span class="tag">${escapeHTML(family(c))}</span><span class="tag">CCD: ${escapeHTML(c.comp)}</span></div></div></div>
+        <div class="abstract-area"><div class="paper-label">Associated publication</div><div class="paper-title">${escapeHTML(c.paper||'No primary publication linked in the PDB record')}</div>${abstractAvailable?`<button class="abstract-toggle" type="button" data-action="abstract" aria-expanded="false">Read abstract ↓</button><div class="abstract-content hidden" role="region"></div>`:''}</div>
+        <div class="card-footer"><a class="action primary" href="${escapeHTML(rcsb3D(c))}" target="_blank" rel="noopener">Explore 3D ${icon('arrow')}</a><a class="action" href="https://www.rcsb.org/structure/${encodeURIComponent(c.pdb)}" target="_blank" rel="noopener">PDB entry ${icon('arrow')}</a>${c.doi?`<a class="action" href="https://doi.org/${encodeURIComponent(c.doi)}" target="_blank" rel="noopener">Paper ${icon('arrow')}</a>`:''}<button type="button" class="action bookmark" data-action="save" aria-label="${saved?'Remove saved complex':'Save complex'}" aria-pressed="${saved}">${icon('bookmark')} ${saved?'Saved':'Save'}</button></div>
+      </article>`;
+    }
+    function filterCards(cards){
+      const q=$('text-filter').value.toLowerCase().trim();const m=$('method-filter').value;
+      return cards.filter(c=>(!q||[c.pdb,c.comp,c.ligand,c.title,c.paper,...c.protein].join(' ').toLowerCase().includes(q))&&(m==='all'||(m==='xray'&&c.method.includes('X-RAY'))||(m==='em'&&c.method.includes('ELECTRON'))||(m==='other'&&!c.method.includes('X-RAY')&&!c.method.includes('ELECTRON'))));
+    }
+    let depictObserver;
+    function render(){
+      const data=state.mode==='saved'?Object.values(state.saved).reverse():state.cards;
+      const visible=filterCards(data);
+      $('feed').innerHTML=visible.length?visible.map(cardHTML).join(''):(state.loading?'':`<div class="empty"><strong>${state.mode==='saved'?'Nothing saved yet':'No matching cards'}</strong>${state.mode==='saved'?'Use the Save control on a structure to keep it here.':'Try clearing the local filters, or load more structures.'}</div>`);
+      for(const e of document.querySelectorAll('.depiction'))depictObserver?.observe(e);
+      updateStats();
+      $('load-more').classList.toggle('hidden',state.mode==='saved'||state.ended);
+      $('load-more').disabled=state.loading;
+      $('load-more').textContent=state.loading?'Loading…':'Load more structures';
+    }
+    async function loadMore(){
+      if(state.loading||state.ended||state.mode==='saved')return;
+      const generation=state.generation;state.loading=true;
+      if(!state.cards.length)$('feed').innerHTML='<div class="loading"><div class="spinner"></div>Searching ligand-bound structures in the PDB…</div>';
+      $('load-more').disabled=true;$('load-more').textContent='Loading…';
+      try{
+        let offset=state.offset;
+        if(state.mode==='random'){
+          if(!state.total){const head=await search(0,1);state.total=head.total_count||0}
+          const pages=Math.max(1,Math.ceil(state.total/PAGE_SIZE));
+          let page=Math.floor(Math.random()*pages);
+          for(let i=0;i<12&&state.randomPages.has(page);i++)page=Math.floor(Math.random()*pages);
+          state.randomPages.add(page);offset=page*PAGE_SIZE;
+        }
+        const result=await search(offset,PAGE_SIZE);if(state.generation!==generation)return;
+        state.total=result.total_count||state.total;
+        const ids=(result.result_set||[]).map(x=>x.identifier).filter(Boolean);
+        if(state.mode!=='random')state.offset+=PAGE_SIZE;
+        if(!ids.length){state.ended=true;return}
+        // Small batches avoid huge GraphQL payloads and keep the UI responsive.
+        const entries=await describe(ids);if(state.generation!==generation)return;
+        const newCards=entries.flatMap(fromEntry);
+        for(const c of newCards){const id=keyFor(c);if(!state.seen.has(id)){state.seen.add(id);state.cards.push(c)}}
+        if(state.mode!=='random'&&state.offset>=state.total)state.ended=true;
+        if(state.mode==='random'&&state.randomPages.size>=Math.ceil(state.total/PAGE_SIZE))state.ended=true;
+        $('feed-description').textContent=`Live from RCSB · ${state.total.toLocaleString()} matching PDB entries`;
+      }catch(e){
+        if(state.generation!==generation)return;
+        console.error('PDB Explorer:',e);
+        $('feed-description').textContent='API request failed';
+        const box=document.createElement('div');box.className='error';box.innerHTML=`<strong>Could not load PDB data.</strong><div>${escapeHTML(e.message)}</div><p>RCSB or your browser/network may be temporarily refusing requests. The page needs an internet connection, but no backend.</p><button type="button" id="retry-api">Retry the search</button>`;
+        $('feed').replaceChildren(box);box.querySelector('button').addEventListener('click',()=>{state.loading=false;loadMore()});
+        $('load-more').classList.add('hidden');return;
+      }finally{
+        if(state.generation===generation){state.loading=false;if(!$('feed').querySelector('.error'))render()}
+      }
+    }
+    function changeMode(mode){
+      state.generation++;state.mode=mode;state.offset=0;state.total=0;state.ended=false;state.loading=false;state.cards=[];state.seen.clear();state.randomPages.clear();
+      for(const b of document.querySelectorAll('[data-mode]'))b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
+      const headings={latest:'Fresh from the archive',old:'Rediscover the classics',random:'The PDB on shuffle',saved:'Your reading shelf'};
+      const descriptions={latest:'Newest first · live RCSB search',old:'Before 2015 · oldest first',random:'A random slice of the archive',saved:'Saved to this browser'};
+      $('feed-heading').textContent=headings[mode];$('feed-description').textContent=descriptions[mode];
+      $('filter-hint').textContent=mode==='saved'?'Your personal collection':'Ligands of interest · ≥150 Da';
+      if(mode==='saved')render();else loadMore();
+    }
+    let rdkitPromise;
+    function loadRDKit(){
+      if(rdkitPromise)return rdkitPromise;
+      rdkitPromise=new Promise((resolve,reject)=>{
+        if(typeof window.initRDKitModule==='function'){window.initRDKitModule().then(resolve,reject);return}
+        const script=document.createElement('script');script.src=RDKIT_JS;script.async=true;
+        script.onload=()=>window.initRDKitModule({locateFile:file=>new URL(file,RDKIT_JS).href}).then(resolve,reject);
+        script.onerror=()=>reject(new Error('Unable to load RDKit.js'));
+        document.head.append(script);
+      });return rdkitPromise;
+    }
+    function setupDepictions(){
+      depictObserver=new IntersectionObserver(entries=>{
+        for(const entry of entries){if(!entry.isIntersecting)continue;
+          const el=entry.target;depictObserver.unobserve(el);
+          if(!el.dataset.smiles){el.textContent='2D depiction unavailable for this ligand';continue}
+          loadRDKit().then(rdkit=>{
+            if(!el.isConnected)return;
+            let mol;
+            try{mol=rdkit.get_mol(el.dataset.smiles);if(!mol)throw new Error('Invalid SMILES');const svg=mol.get_svg();if(!svg)throw new Error('No drawing');
+              el.innerHTML=svg;
+              // This SVG is generated by RDKit, never from raw API HTML.
+              const node=el.querySelector('svg');if(node){node.setAttribute('role','img');node.setAttribute('aria-label',`${el.dataset.comp} 2D chemical structure`)}
+            }catch(e){console.warn('RDKit depiction failed',e);el.innerHTML=`<div class="depict-placeholder">2D depiction unavailable<br><a target="_blank" rel="noopener" href="https://www.rcsb.org/ligand/${encodeURIComponent(el.dataset.comp)}">View ligand at RCSB ↗</a></div>`}
+            finally{mol?.delete()}
+          }).catch(e=>{console.warn('RDKit.js unavailable',e);if(el.isConnected)el.innerHTML=`<div class="depict-placeholder">2D renderer unavailable<br><a target="_blank" rel="noopener" href="https://www.rcsb.org/ligand/${encodeURIComponent(el.dataset.comp)}">View ligand at RCSB ↗</a></div>`});
+        }
+      },{rootMargin:'400px 0px'});
+    }
+    const abstractCache=new Map();
+    async function loadAbstract(c){
+      const lookup=c.pmid?`EXT_ID:${c.pmid} AND SRC:MED`:`DOI:"${c.doi}"`;
+      if(abstractCache.has(lookup))return abstractCache.get(lookup);
+      const url=new URL(EUROPE_PMC);url.searchParams.set('query',lookup);url.searchParams.set('format','json');url.searchParams.set('resultType','core');url.searchParams.set('pageSize','1');
+      const payload=await fetchJSON(url.href);const record=payload.resultList?.result?.[0];
+      const raw=text(record?.abstractText).replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').trim();
+      const value=raw||'No abstract is available from Europe PMC for this publication.';
+      abstractCache.set(lookup,value);return value;
+    }
+    $('feed').addEventListener('click',async e=>{
+      const btn=e.target.closest('button[data-action]');if(!btn)return;
+      const cardEl=btn.closest('.card');const id=cardEl?.dataset.key;
+      const item=state.cards.find(item=>keyFor(item)===id)||state.saved[id]||(exampleItem&&keyFor(exampleItem)===id?exampleItem:null);
+      if(!item)return;
+      if(btn.dataset.action==='save'){
+        if(state.saved[id])delete state.saved[id];else state.saved[id]=item;
+        persistSaved();if(state.mode==='saved'&&$('feed-heading').textContent==='Your reading shelf')render();else{
+          btn.setAttribute('aria-pressed',String(!!state.saved[id]));btn.setAttribute('aria-label',state.saved[id]?'Remove saved complex':'Save complex');btn.innerHTML=`${icon('bookmark')} ${state.saved[id]?'Saved':'Save'}`;updateStats();}
+      }
+      if(btn.dataset.action==='abstract'){
+        const region=cardEl.querySelector('.abstract-content');const expanded=btn.getAttribute('aria-expanded')==='true';
+        if(expanded){region.classList.add('hidden');btn.setAttribute('aria-expanded','false');btn.textContent='Read abstract ↓';return}
+        region.classList.remove('hidden');btn.setAttribute('aria-expanded','true');btn.textContent='Hide abstract ↑';
+        if(!region.dataset.loaded){region.textContent='Loading the paper abstract…';try{region.textContent=await loadAbstract(item)}catch(error){region.textContent=`Could not retrieve abstract (${error.message}). Open the paper instead.`}region.dataset.loaded='true'}
+      }
+    });
+    // The example is a live GraphQL result, but isn't bookmarked automatically.
+    let exampleItem=null;
+    async function showExample(){
+      changeMode('saved');$('feed-heading').textContent='A classic: 1IEP';$('feed-description').textContent='Example loaded live from RCSB';
+      $('feed').innerHTML='<div class="loading"><div class="spinner"></div>Retrieving 1IEP…</div>';
+      const generation=++state.generation;exampleItem=null;
+      try{const data=await describe(['1IEP']);if(state.generation!==generation)return;
+        const all=data.flatMap(fromEntry);const item=all.find(c=>c.comp==='STI')||all[0];if(!item)throw new Error('1IEP has no displayable ligand instance');
+        exampleItem=item;$('feed').innerHTML=cardHTML(item);for(const e of document.querySelectorAll('.depiction'))depictObserver.observe(e);
+        $('counter').textContent='1 classic';$('load-more').classList.add('hidden');
+      }catch(e){if(state.generation!==generation)return;$('feed').innerHTML=`<div class="error">Unable to fetch 1IEP: ${escapeHTML(e.message)}</div>`}
+    }
+    for(const b of document.querySelectorAll('[data-mode]'))b.addEventListener('click',()=>changeMode(b.dataset.mode));
+    $('load-more').addEventListener('click',loadMore);
+    $('example').addEventListener('click',showExample);
+    $('filter-toggle').addEventListener('click',()=>{const open=$('controls').classList.toggle('open');$('filter-toggle').setAttribute('aria-expanded',String(open))});
+    $('text-filter').addEventListener('input',()=>{if($('feed-heading').textContent==='A classic: 1IEP')return;render()});
+    $('method-filter').addEventListener('change',()=>{if($('feed-heading').textContent==='A classic: 1IEP')return;render()});
+    setupDepictions();updateStats();changeMode('latest');
+  })();
+  </script>
+</body>
+</html>
