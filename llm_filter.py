@@ -83,8 +83,11 @@ def call_llm(model: str, key: str, system: str, user: str,
             req = urllib.request.Request(OPENROUTER_URL, data=data, headers=headers)
             with urllib.request.urlopen(req, timeout=90) as resp:
                 body = json.loads(resp.read().decode())
-            return body["choices"][0]["message"]["content"]
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+            content = body["choices"][0]["message"].get("content")
+            if content is None:
+                raise ValueError("LLM returned empty content (null/None)")
+            return content
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError) as e:
             last = e
             wait = 2 ** attempt
             print(f"  ! API error ({e}); retry in {wait}s", file=sys.stderr)
@@ -92,8 +95,10 @@ def call_llm(model: str, key: str, system: str, user: str,
     raise RuntimeError(f"LLM call failed after {retries} retries: {last}")
 
 
-def parse_json_response(text: str) -> dict:
+def parse_json_response(text: str | None) -> dict:
     """Robustly extract a JSON object from an LLM response."""
+    if text is None:
+        raise ValueError("LLM response was None")
     text = text.strip()
     # strip markdown fences if present
     m = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.DOTALL)
